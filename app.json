@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "boilerplate",
-    "slug": "boilerplate",
+    "name": "action-tray",
+    "slug": "action-tray",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

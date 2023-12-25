@@ -1,5 +1,5 @@
 {
-  "name": "boilerplate",
+  "name": "action-tray",
   "version": "1.0.0",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -10,11 +10,14 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@expo/vector-icons": "^13.0.0",
     "expo": "^49.0.3",
     "expo-status-bar": "~1.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.72.5",
+    "react-native-gesture-handler": "~2.12.0",
+    "react-native-reanimated": "~3.3.0",
     "react-native-web": "~0.19.6"
   },
   "devDependencies": {
