@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { View, Text, useWindowDimensions, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import type {
+  EntryAnimationsValues,
+  ExitAnimationsValues,
+  LayoutAnimation,
+} from 'react-native-reanimated';
 import Animated, {
   Easing,
   Extrapolate,
@@ -98,76 +103,159 @@ function App() {
     };
   }, []);
 
-  //
-  const CustomExitingAnimation = useCallback(values => {
-    'worklet';
+  // Custom animations when extending height of the action tray
+  const CustomExitingAnimation = useCallback(
+    (_: ExitAnimationsValues): LayoutAnimation => {
+      'worklet';
 
-    const animations = {
-      // your animations
-      opacity: withTiming(0, {
-        easing: Easing.out(Easing.ease),
-        duration: 150,
-      }),
-      transform: [
-        {
-          scale: withSpring(1.05, {
-            mass: 0.1,
-            damping: 25,
-            stiffness: 170,
-          }),
-        },
-      ],
-    };
-    const initialValues = {
-      // initial values for animations
-      opacity: 1,
-      transform: [{ scale: 1 }],
-    };
-    // const callback = (finished: boolean) => {
-    //   // optional callback that will fire when layout animation ends
-    // };
-    return {
-      initialValues,
-      animations,
-      // callback,
-    };
-  }, []);
+      const animations = {
+        // your animations
+        opacity: withTiming(0, {
+          easing: Easing.out(Easing.cubic),
+          duration: 250,
+        }),
+        transform: [
+          {
+            scale: withSpring(1.05, {
+              mass: 1,
+              damping: 60,
+              stiffness: 300,
+              overshootClamping: false,
+              restDisplacementThreshold: 0.01,
+              restSpeedThreshold: 2,
+            }),
+          },
+        ],
+      };
+      const initialValues = {
+        // initial values for animations
+        opacity: 1,
+        transform: [{ scale: 1 }],
+      };
+      // const callback = (finished: boolean) => {
+      //   // optional callback that will fire when layout animation ends
+      // };
+      return {
+        initialValues,
+        animations,
+        // callback,
+      };
+    },
+    [],
+  );
 
-  const CustomEnterAnimation = useCallback(values => {
-    'worklet';
+  const CustomEnterAnimation = useCallback(
+    (_: EntryAnimationsValues): LayoutAnimation => {
+      'worklet';
 
-    const animations = {
-      // your animations
-      opacity: withTiming(1, {
-        easing: Easing.out(Easing.ease),
-        duration: 150,
-      }),
-      transform: [
-        {
-          scale: withSpring(1, {
-            mass: 0.1,
-            damping: 25,
-            stiffness: 100,
-          }),
-        },
-      ],
-      originY: values.targetOriginY,
-    };
-    const initialValues = {
-      // initial values for animations
-      opacity: 0,
-      transform: [{ scale: 0.95 }],
-      originY: values.targetOriginY,
-    };
-    // const callback = (finished: boolean) => {
-    //   // optional callback that will fire when layout animation ends
-    // };
-    return {
-      initialValues,
-      animations,
-      // callback,
-    };
-  }, []);
+      const animations = {
+        // your animations
+        opacity: withTiming(1, {
+          easing: Easing.out(Easing.cubic),
+          duration: 250,
+        }),
+        transform: [
+          {
+            scale: withTiming(1, {
+              easing: Easing.out(Easing.cubic),
+              duration: 200,
+            }),
+          },
+        ],
+      };
+      const initialValues = {
+        // initial values for animations
+        opacity: 0,
+        transform: [{ scale: 0.9 }],
+      };
+      // const callback = (finished: boolean) => {
+      //   // optional callback that will fire when layout animation ends
+      // };
+      return {
+        initialValues,
+        animations,
+        // callback,
+      };
+    },
+    [],
+  );
+
+  // Custom animations when shortening height of the action tray
+  const CustomShrinkEnterAnimation = useCallback(
+    (_: EntryAnimationsValues): LayoutAnimation => {
+      'worklet';
+
+      const animations = {
+        // your animations
+        opacity: withTiming(1, {
+          easing: Easing.out(Easing.cubic),
+          duration: 250,
+        }),
+        transform: [
+          {
+            scale: withTiming(1, {
+              easing: Easing.out(Easing.cubic),
+              duration: 200,
+            }),
+          },
+        ],
+      };
+      const initialValues = {
+        // initial values for animations
+        opacity: 0,
+        transform: [{ scale: 1.05 }],
+      };
+      // const callback = (finished: boolean) => {
+      //   // optional callback that will fire when layout animation ends
+      // };
+      return {
+        initialValues,
+        animations,
+        // callback,
+      };
+    },
+    [],
+  );
+
+  const CustomShrinkExitingAnimation = useCallback(
+    (_: ExitAnimationsValues): LayoutAnimation => {
+      'worklet';
+
+      const animations = {
+        // your animations
+        opacity: withTiming(0, {
+          easing: Easing.out(Easing.cubic),
+          duration: 200,
+        }),
+        transform: [
+          {
+            scale: withSpring(0.9, {
+              mass: 1,
+              damping: 60,
+              stiffness: 300,
+              overshootClamping: false,
+              restDisplacementThreshold: 0.01,
+              restSpeedThreshold: 2,
+            }),
+          },
+        ],
+      };
+      const initialValues = {
+        // initial values for animations
+        opacity: 1,
+        transform: [{ scale: 1 }],
+      };
+      // const callback = (finished: boolean) => {
+      //   // optional callback that will fire when layout animation ends
+      // };
+      return {
+        initialValues,
+        animations,
+        // callback,
+      };
+    },
+    [],
+  );
 
   return (
     <View style={styles.container}>
@@ -222,7 +310,7 @@ function App() {
             <Animated.View
               layout={Layout}
               entering={CustomEnterAnimation}
-              exiting={CustomExitingAnimation}
+              exiting={CustomShrinkExitingAnimation}
               style={{ height: 220 }}>
               <Text style={styles.contentText}>
                 You know what? I really don't know what to write here.{'\n\n'}I
@@ -236,7 +324,7 @@ function App() {
           {step === 2 && (
             <Animated.View
               layout={Layout}
-              entering={CustomEnterAnimation}
+              entering={CustomShrinkEnterAnimation}
               exiting={CustomExitingAnimation}
               style={{ height: 180 }}>
               <Text style={styles.contentText}>

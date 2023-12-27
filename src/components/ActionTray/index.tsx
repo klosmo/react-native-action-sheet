@@ -5,9 +5,6 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import type { WithSpringConfig } from 'react-native-reanimated';
 import Animated, {
   Extrapolate,
-  FadeIn,
-  FadeOut,
-  Layout,
   interpolate,
   runOnJS,
   useAnimatedStyle,
@@ -16,6 +13,8 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Backdrop } from './Backdrop';
+
+const OVERDRAG = 0; // Amount of overdrag allowed, until we figure out how to properly add some sort of "smooth elasticity" when overshooting - keep this at 0
 
 // Get the screen height
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -96,11 +95,11 @@ const ActionTray = React.forwardRef<ActionTrayRef, ActionTrayProps>(
         context.value = { y: translateY.value };
       })
       .onUpdate(event => {
-        // Handle just gestures to swipe down
-        if (event.translationY > -50) {
-          // Update the translateY value with clamping
-          translateY.value = event.translationY + context.value.y;
-        }
+        const offsetDelta = event.translationY + context.value.y;
+
+        const clamp = Math.max(-OVERDRAG, offsetDelta);
+
+        translateY.value = offsetDelta > 0 ? offsetDelta : clamp;
       })
       .onEnd(event => {
         if (event.translationY > 100) {
@@ -139,11 +138,8 @@ const ActionTray = React.forwardRef<ActionTrayRef, ActionTrayProps>(
         {/* Gesture detector to handle pan gestures */}
         <GestureDetector gesture={gesture}>
           <Animated.View
-            // layout={layout}
             style={[styles.actionTrayContainer, rActionTrayStyle, style]}>
-            <Animated.View layout={Layout} entering={FadeIn} exiting={FadeOut}>
-              {children}
-            </Animated.View>
+            <Animated.View>{children}</Animated.View>
           </Animated.View>
         </GestureDetector>
       </>
