@@ -14,7 +14,7 @@ import Animated, {
 
 import { Backdrop } from './Backdrop';
 
-const OVERDRAG = 0; // Amount of overdrag allowed, until we figure out how to properly add some sort of "smooth elasticity" when overshooting - keep this at 0
+const OVERDRAG = 20; // Amount of overdrag allowed
 
 // Get the screen height
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -74,11 +74,11 @@ const ActionTray = React.forwardRef<ActionTrayRef, ActionTrayProps>(
     useImperativeHandle(
       ref,
       () => ({
+        close,
         open: () => {
           'worklet';
           scrollTo(0);
         },
-        close,
         isActive: () => {
           return active.value;
         },
@@ -95,11 +95,23 @@ const ActionTray = React.forwardRef<ActionTrayRef, ActionTrayProps>(
         context.value = { y: translateY.value };
       })
       .onUpdate(event => {
-        const offsetDelta = event.translationY + context.value.y;
+        const offsetDelta = context.value.y + event.translationY;
 
         const clamp = Math.max(-OVERDRAG, offsetDelta);
 
-        translateY.value = offsetDelta > 0 ? offsetDelta : clamp;
+        // create a smooth resistance effect when overdragging
+        const overdragStop = offsetDelta / 20;
+
+        if (event.translationY < 0) {
+          // Drag up
+          translateY.value =
+            overdragStop <= clamp
+              ? withSpring(clamp, { mass: 0.5 })
+              : overdragStop;
+        } else {
+          // Drag down
+          translateY.value = offsetDelta;
+        }
       })
       .onEnd(event => {
         if (event.translationY > 100) {
